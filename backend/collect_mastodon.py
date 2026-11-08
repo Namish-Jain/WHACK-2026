@@ -116,6 +116,12 @@ def next_page(header, current_url):
 class MastodonAdapter:
     def __init__(self, instance, token=None):
         self.instance = instance.rstrip("/")
+        if urlsplit(self.instance).hostname == "bsky.brid.gy":
+            raise CollectionError(
+                "This is a bridged Bluesky account. This collector supports Mastodon server APIs, "
+                "not the bsky.brid.gy bridge. Use a native Mastodon handle (for example "
+                "@bagder@mastodon.social). Collecting the original Bluesky audience requires a Bluesky adapter."
+            )
         self.token = token
         self.opener = build_opener(NoRedirect())
         self.requests = []

@@ -1,0 +1,281 @@
+{
+  "schema_version": "1.0",
+  "model_version": "hackathon-heuristics-v1",
+  "sample_size": 300,
+  "as_of": "2026-11-07T13:24:22.125039+00:00",
+  "config": {
+    "low_activity_max_posts": 3,
+    "extreme_smoothed_ratio": 10.0,
+    "new_account_days": 30.0,
+    "incomplete_max_fraction": 0.3333333333333333,
+    "benford_mad_full_scale": 0.06,
+    "minimum_feature_sample": 30,
+    "benford_minimum_log10_span": 2.0,
+    "weights": {
+      "benford": 0.35,
+      "ratio": 0.25,
+      "activity": 0.2,
+      "new_account": 0.1,
+      "profile": 0.1
+    }
+  },
+  "input_quality": {
+    "input_rows": 300,
+    "unique_rows": 300,
+    "duplicates_removed": 0,
+    "invalid_values_by_field": {},
+    "missing_values_by_field": {
+      "last_status_at": 177
+    },
+    "source_path": "aggregate-regression-fixture"
+  },
+  "collection": {
+    "target_input": "@sample@example.org",
+    "collected_at": "2026-11-07T13:24:22.125039+00:00",
+    "reported_followers_count": 55426,
+    "sampling_method": "First unique accessible followers in API order; not random.",
+    "stop_reason": "limit_reached",
+    "limitations": [
+      "Server-visible records may be cached or incomplete for remote accounts.",
+      "A short or empty response does not establish that the account has no followers.",
+      "Bot flag is declared automation, not evidence of fake followers.",
+      "Custom-avatar presence is a URL heuristic with unknown values preserved."
+    ]
+  },
+  "benford": {
+    "n_valid": 178,
+    "n_zero_excluded": 122,
+    "n_missing_or_invalid": 0,
+    "mad": 0.02743839558479759,
+    "log10_span": 3.843730965112092,
+    "occupied_orders_of_magnitude": 4,
+    "chart_data": [
+      {
+        "digit": 1,
+        "count": 65,
+        "observed_proportion": 0.3651685393258427,
+        "expected_proportion": 0.3010299956639812,
+        "expected_count": 53.583339228188656
+      },
+      {
+        "digit": 2,
+        "count": 40,
+        "observed_proportion": 0.2247191011235955,
+        "expected_proportion": 0.17609125905568124,
+        "expected_count": 31.34424411191126
+      },
+      {
+        "digit": 3,
+        "count": 20,
+        "observed_proportion": 0.11235955056179775,
+        "expected_proportion": 0.12493873660829993,
+        "expected_count": 22.239095116277387
+      },
+      {
+        "digit": 4,
+        "count": 15,
+        "observed_proportion": 0.08426966292134831,
+        "expected_proportion": 0.09691001300805642,
+        "expected_count": 17.249982315434043
+      },
+      {
+        "digit": 5,
+        "count": 16,
+        "observed_proportion": 0.0898876404494382,
+        "expected_proportion": 0.07918124604762482,
+        "expected_count": 14.094261796477218
+      },
+      {
+        "digit": 6,
+        "count": 9,
+        "observed_proportion": 0.05056179775280899,
+        "expected_proportion": 0.06694678963061322,
+        "expected_count": 11.916528554249153
+      },
+      {
+        "digit": 7,
+        "count": 5,
+        "observed_proportion": 0.028089887640449437,
+        "expected_proportion": 0.05799194697768673,
+        "expected_count": 10.32256656202824
+      },
+      {
+        "digit": 8,
+        "count": 4,
+        "observed_proportion": 0.02247191011235955,
+        "expected_proportion": 0.05115252244738129,
+        "expected_count": 9.10514899563387
+      },
+      {
+        "digit": 9,
+        "count": 4,
+        "observed_proportion": 0.02247191011235955,
+        "expected_proportion": 0.04575749056067514,
+        "expected_count": 8.144833319800176
+      }
+    ],
+    "signal": "moderate",
+    "scoring_eligible": true
+  },
+  "features": {
+    "extreme_ratio_rate": {
+      "value": 0.49,
+      "n_valid": 300,
+      "n_flagged": 147,
+      "n_missing": 0
+    },
+    "low_activity_rate": {
+      "value": 0.7666666666666667,
+      "n_valid": 300,
+      "n_flagged": 230,
+      "n_missing": 0
+    },
+    "new_account_rate": {
+      "value": 0.7933333333333333,
+      "n_valid": 300,
+      "n_flagged": 238,
+      "n_missing": 0
+    },
+    "incomplete_profile_rate": {
+      "value": 0.5733333333333334,
+      "n_valid": 300,
+      "n_flagged": 172,
+      "n_missing": 0
+    },
+    "declared_bot_rate": {
+      "value": 0.0033333333333333335,
+      "n_valid": 300,
+      "n_flagged": 1,
+      "n_missing": 0
+    },
+    "display_name_rate": {
+      "value": 0.79,
+      "n_valid": 300,
+      "n_flagged": 237,
+      "n_missing": 0
+    },
+    "median_imbalance": 2.251291798606495,
+    "median_account_age_days": 6.55858941017361,
+    "average_profile_completeness": 0.4533333333333333,
+    "future_created_at_count": 0,
+    "last_activity": {
+      "n_valid": 123,
+      "n_missing_or_future": 177,
+      "median_days_since_last_status": 2
+    },
+    "follower_count_distribution": {
+      "n_valid": 300,
+      "n_missing": 0,
+      "median": 1.0,
+      "iqr_log1p": 1.6094379124341003,
+      "sample_std_log1p": 1.478497606829913,
+      "minimum": 0,
+      "maximum": 6978
+    }
+  },
+  "scoring": {
+    "anomaly_score": 57.255730757798595,
+    "severity": "moderate",
+    "components": {
+      "benford": {
+        "normalized_value": 0.45730659307995986,
+        "n_valid": 178,
+        "configured_weight": 0.35,
+        "included": true,
+        "exclusion_reason": null,
+        "effective_weight": 0.35,
+        "contribution_points": 16.005730757798595
+      },
+      "ratio": {
+        "normalized_value": 0.49,
+        "n_valid": 300,
+        "configured_weight": 0.25,
+        "included": true,
+        "exclusion_reason": null,
+        "effective_weight": 0.25,
+        "contribution_points": 12.25
+      },
+      "activity": {
+        "normalized_value": 0.7666666666666667,
+        "n_valid": 300,
+        "configured_weight": 0.2,
+        "included": true,
+        "exclusion_reason": null,
+        "effective_weight": 0.2,
+        "contribution_points": 15.333333333333334
+      },
+      "new_account": {
+        "normalized_value": 0.7933333333333333,
+        "n_valid": 300,
+        "configured_weight": 0.1,
+        "included": true,
+        "exclusion_reason": null,
+        "effective_weight": 0.1,
+        "contribution_points": 7.933333333333334
+      },
+      "profile": {
+        "normalized_value": 0.5733333333333334,
+        "n_valid": 300,
+        "configured_weight": 0.1,
+        "included": true,
+        "exclusion_reason": null,
+        "effective_weight": 0.1,
+        "contribution_points": 5.733333333333333
+      }
+    },
+    "configured_weight_coverage": 1.0,
+    "interpretation": "Uncalibrated audience anomaly indicator; not a probability or evidence that followers are fake."
+  },
+  "bootstrap": {
+    "status": "computed",
+    "replicates": 1000,
+    "seed": 42,
+    "method": "Row bootstrap with replacement; percentile 2.5 and 97.5; original score components and weights held fixed.",
+    "interpretation": "Within-sample sensitivity only. Does not correct API-order selection bias, federation gaps, network dependence, or uncalibrated scoring.",
+    "intervals": {
+      "benford_mad": {
+        "lower": 0.019462937248129263,
+        "upper": 0.04336066038588391,
+        "valid_replicates": 1000,
+        "missing_replicates": 0
+      },
+      "extreme_ratio_rate": {
+        "lower": 0.43333333333333335,
+        "upper": 0.55,
+        "valid_replicates": 1000,
+        "missing_replicates": 0
+      },
+      "low_activity_rate": {
+        "lower": 0.7166666666666667,
+        "upper": 0.8134166666666666,
+        "valid_replicates": 1000,
+        "missing_replicates": 0
+      },
+      "new_account_rate": {
+        "lower": 0.7433333333333333,
+        "upper": 0.84,
+        "valid_replicates": 1000,
+        "missing_replicates": 0
+      },
+      "incomplete_profile_rate": {
+        "lower": 0.5166666666666667,
+        "upper": 0.6266666666666667,
+        "valid_replicates": 1000,
+        "missing_replicates": 0
+      },
+      "anomaly_score": {
+        "lower": 51.564145454750395,
+        "upper": 67.42335384001856,
+        "valid_replicates": 1000,
+        "missing_replicates": 0
+      }
+    }
+  },
+  "limitations": [
+    "Score weights, normalizations, thresholds, and sample-size gates are hackathon heuristics, not learned or validated against authenticity labels.",
+    "Follower counts are not established to follow Benford's law. A mismatch alone is not evidence of manipulation; range and sample-size gates do not establish applicability.",
+    "This sample is not established as random or representative. Its feature rates do not estimate the whole audience without additional sampling assumptions.",
+    "Low posting activity can describe readers; declared bots can be legitimate; a sparse profile does not establish inauthenticity.",
+    "Avatar presence inherits the collector's URL heuristic. Last-status dates do not measure logins and are not used in the anomaly score."
+  ]
+}

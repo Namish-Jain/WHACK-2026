@@ -1,0 +1,16 @@
+{
+  "low_activity_max_posts": 3,
+  "extreme_smoothed_ratio": 10.0,
+  "new_account_days": 30.0,
+  "incomplete_max_fraction": 0.3333333333333333,
+  "benford_mad_full_scale": 0.06,
+  "minimum_feature_sample": 30,
+  "benford_minimum_log10_span": 2.0,
+  "weights": {
+    "benford": 0.35,
+    "ratio": 0.25,
+    "activity": 0.2,
+    "new_account": 0.1,
+    "profile": 0.1
+  }
+}

@@ -1,0 +1,4 @@
+# Python 3.10+
+# Server, collection, statistics and Gemini use the standard library.
+# Matplotlib is used only by backend/plot_benford.py.
+matplotlib>=3.6,<4

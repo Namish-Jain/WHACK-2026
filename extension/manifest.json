@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "DeTect",
+  "version": "1.2.0",
+  "description": "Analyse a profile and get a concise bot-risk assessment.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "action": {
+    "default_title": "DeTect",
+    "default_popup": "popup.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src http://127.0.0.1:8765"
+  }
+}

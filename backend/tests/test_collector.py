@@ -1,13 +1,9 @@
-import importlib.util
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-path = Path(__file__).resolve().parents[1] / 'outputs' / 'collect_mastodon.py'
-spec = importlib.util.spec_from_file_location('collector', path)
-m = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(m)
+import collect_mastodon as m
 
 
 class CollectorTests(unittest.TestCase):

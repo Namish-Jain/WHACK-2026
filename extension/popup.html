@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en-GB">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DeTect</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><h1>DeTect</h1><span id="connection" class="connection" role="status">Offline</span></header>
+  <main>
+    <form id="analyze-form">
+      <label for="profile">Profile</label>
+      <input id="profile" type="text" placeholder="Profile URL or @name@server" maxlength="500" required spellcheck="false" autocomplete="off">
+      <button id="current-tab" type="button" class="text-button">Use current tab</button>
+      <p class="sample-limit">Up to 300 public followers per analysis</p>
+      <button id="analyze" class="primary" type="submit">Analyse</button>
+    </form>
+    <section id="progress" hidden aria-label="Analysis progress">
+      <ol class="pipeline">
+        <li id="step-0" class="step pending"><span id="node-0" class="node" aria-hidden="true">1</span><span class="step-label">Reading<br>followers</span></li>
+        <li id="step-1" class="step pending"><span id="node-1" class="node" aria-hidden="true">2</span><span class="step-label">Analysing<br>patterns</span></li>
+        <li id="step-2" class="step pending"><span id="node-2" class="node" aria-hidden="true">3</span><span class="step-label">Writing<br>explanation</span></li>
+      </ol>
+      <span id="stage" class="sr-only" role="status" aria-live="polite"></span>
+    </section>
+    <section id="result" hidden aria-live="polite"><h2 id="rating"></h2>
+      <div id="score-panel" hidden>
+        <p class="score-line"><span id="score"></span><span class="score-unit"> / 100</span><span class="score-label">Bot risk score</span></p>
+        <div id="risk-scale" class="risk-scale" role="meter" aria-label="Bot risk score" aria-valuemin="0" aria-valuemax="100"><span id="risk-marker" class="risk-marker" aria-hidden="true"></span></div>
+        <div class="scale-labels"><span>Low risk</span><span>Very high risk</span></div>
+      </div>
+      <p id="sample-count" class="sample-count" hidden></p><p id="summary"></p></section>
+    <p id="error" class="error" role="alert" hidden></p>
+    <button id="retry" class="secondary" type="button" hidden>Retry explanation</button>
+    <details id="settings">
+      <summary>Connection</summary>
+      <div class="setting-group"><label for="token">Connection code</label><input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Enter connection code"><button id="connect" type="button" class="secondary">Connect</button></div>
+      <form id="key-form" class="setting-group">
+        <label for="api-key">Gemini API key</label><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Enter API key" maxlength="2048">
+        <label for="model">Model</label><input id="model" type="text" spellcheck="false" autocomplete="off" placeholder="Use default model">
+        <button id="save-key" type="submit" class="secondary">Save key</button>
+        <p id="settings-message" role="status"></p>
+      </form>
+    </details>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body></html>

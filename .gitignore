@@ -1,0 +1,37 @@
+# Local credentials and Python environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+**/.detest/
+
+# Runtime data and generated reports
+backend/history/
+backend/experiments/
+backend/results/
+backend/research_results/
+history/
+results/
+experiments/
+network_comparison/
+mastodon_data_*/
+*.sqlite3
+*.sqlite3-*
+*.db
+*.log
+
+# Python / editor / operating-system caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.DS_Store
+.vscode/
+.idea/
+node_modules/
+
+# Old exports and upgrade backups
+upgrade_backup*/
+*.zip
