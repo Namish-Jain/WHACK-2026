@@ -70,6 +70,17 @@ function render(result) {
   $('rating').textContent = RISK_LABELS[result.severity] || 'Not enough data';
   $('summary').textContent = result.score === null
     ? 'There is not enough public follower information to assess this profile.' : result.gemini_reason;
+  const stats = result.stats_analysis;
+  $('stats-analysis').hidden = !stats;
+  if (stats) {
+    $('stat-fit').textContent = Number.isFinite(stats.goodness_of_fit) ? stats.goodness_of_fit.toFixed(2) : 'Not available';
+    const p = stats.adjusted_p_value;
+    $('stat-p').textContent = !Number.isFinite(p) ? 'Not available' : stats.p_value_at_floor && p <= 1e-300
+      ? '≤ 1e-300' : p > 0 && p < .001 ? p.toExponential(2) : p.toFixed(3);
+    for (const [id, value] of [['stat-ratio', stats.following_imbalance], ['stat-activity', stats.low_activity]]) {
+      $(id).textContent = Number.isFinite(value) ? (100 * value).toFixed(1) + '%' : 'Not available';
+    }
+  }
   $('result').hidden = false;
 }
 async function checkConnection() {

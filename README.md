@@ -2,7 +2,7 @@
 
 DeTect is a local Chrome extension that analyses a Mastodon profile's public followers and explains unusual audience patterns in plain language. Python computes the statistics and bot-risk score; Gemini writes the short explanation.
 
-Each analysis reads up to 300 public followers. The extension shows **Reading followers → Analysing patterns → Writing explanation**, followed by a score out of 100, a green-to-red scale and a short explanation.
+Each analysis reads up to 300 public followers. The extension shows **Reading followers → Analysing patterns → Writing explanation**, followed by a score out of 100, a green-to-red scale and a short explanation. Expand **stats analysis (FOR THE NERDS)** for the Benford chi-square goodness-of-fit statistic, its Holm-adjusted p-value, following-imbalance rate and low-activity rate. Smaller chi-square values mean closer agreement with the Benford reference; this is separate from the bot-risk score. Percentages use followers with known values, and tests that cannot be computed show “Not available”.
 
 ## Project layout
 

@@ -129,6 +129,23 @@ class ExtensionTests(unittest.TestCase):
             self.assertIn('not whether the profile owner is fake', result['limitation'])
             self.assertLess(len(result['summary'].split()), 85)
 
+    def test_compact_stats_expose_existing_analysis_values(self):
+        stats = result_for(example(), 'saved')['stats_analysis']
+        self.assertAlmostEqual(stats['goodness_of_fit'], 14.029288758264371)
+        self.assertAlmostEqual(stats['adjusted_p_value'], 0.08100520262698216)
+        self.assertAlmostEqual(stats['following_imbalance'], .49)
+        self.assertAlmostEqual(stats['low_activity'], 23 / 30)
+        self.assertFalse(stats['p_value_at_floor'])
+
+    def test_compact_stats_keep_withheld_and_missing_values_unavailable(self):
+        report = example()
+        report['benford']['n_valid'] = 0
+        report['features']['low_activity_rate'].update(value=None, n_valid=0, n_flagged=0)
+        stats = result_for(report, 'saved')['stats_analysis']
+        self.assertIsNone(stats['goodness_of_fit'])
+        self.assertIsNone(stats['adjusted_p_value'])
+        self.assertIsNone(stats['low_activity'])
+
     def test_gemini_brief_validation(self):
         good = 'The sample contains many quiet accounts and accounts that follow far more people than follow them.'
         self.assertEqual(validate_reason({'reason': good}), good)

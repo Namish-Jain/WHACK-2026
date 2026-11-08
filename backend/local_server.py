@@ -52,6 +52,7 @@ def normalize_profile(value):
 
 def result_for(report, mode, run_id=None):
     evidence = prepare_evidence(report)
+    goodness = next(t for t in evidence['hypothesis_testing']['tests'] if t['id'] == 'benford_goodness_of_fit')
     score = report['scoring']['anomaly_score']
     severity = report['scoring']['severity']
     if score is None:
@@ -68,6 +69,13 @@ def result_for(report, mode, run_id=None):
             'sample_size': report['sample_size'], 'as_of': report['as_of'], 'mode': mode,
             'run_id': run_id, 'weight_coverage': report['scoring']['configured_weight_coverage'],
             'interval': evidence['facts']['score_interval'],
+            'stats_analysis': {
+                'goodness_of_fit': goodness['statistic'],
+                'adjusted_p_value': goodness['p_value_holm'],
+                'p_value_at_floor': goodness.get('p_value_at_numerical_floor', False),
+                'following_imbalance': report['features']['extreme_ratio_rate']['value'],
+                'low_activity': report['features']['low_activity_rate']['value'],
+            },
             'signals': [{'name': k, 'description': REASONS[k], 'measurement': evidence['facts'][k],
                          'points': report['scoring']['components'][k]['contribution_points']}
                         for k in evidence['top_contributors']],

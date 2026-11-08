@@ -25,7 +25,17 @@
         <div id="risk-scale" class="risk-scale" role="meter" aria-label="Bot risk score" aria-valuemin="0" aria-valuemax="100"><span id="risk-marker" class="risk-marker" aria-hidden="true"></span></div>
         <div class="scale-labels"><span>Low risk</span><span>Very high risk</span></div>
       </div>
-      <p id="sample-count" class="sample-count" hidden></p><p id="summary"></p></section>
+      <p id="sample-count" class="sample-count" hidden></p><p id="summary"></p>
+      <details id="stats-analysis" hidden>
+        <summary>stats analysis (FOR THE NERDS)</summary>
+        <dl class="stats-list">
+          <div><dt>Goodness of fit score (χ²):</dt><dd id="stat-fit"></dd></div>
+          <div><dt>Adjusted p-value:</dt><dd id="stat-p"></dd></div>
+          <div><dt>Following imbalance:</dt><dd id="stat-ratio"></dd></div>
+          <div><dt>Low-activity followers:</dt><dd id="stat-activity"></dd></div>
+        </dl>
+      </details>
+    </section>
     <p id="error" class="error" role="alert" hidden></p>
     <button id="retry" class="secondary" type="button" hidden>Retry explanation</button>
     <details id="settings">

@@ -7,7 +7,7 @@ import {normalizeProfile} from '../logic.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const html=fs.readFileSync(path.join(root,'popup.html'),'utf8');
 const script=fs.readFileSync(path.join(root,'popup.js'),'utf8').replace(/^import .*?;\n/,'');
-const fixture={account:'@alice@example.org',severity:'moderate',score:57.255,sample_size:287,presentation_version:2,
+const fixture={account:'@alice@example.org',severity:'moderate',score:57.255,sample_size:287,presentation_version:2,stats_analysis:{goodness_of_fit:14.029288758264371,adjusted_p_value:.0810052026,following_imbalance:.49,low_activity:23/30},
  gemini_reason:'Quiet accounts and sparse profiles contribute most to this assessment.',summary_source:'Gemini + Python rating'};
 class Element{
  constructor(){this.handlers={};this.hidden=false;this.value='';this.disabled=false;this.style={};this.textContent='';}
@@ -57,6 +57,12 @@ assert.equal(app.get('step-2').className,'step completed');assert.equal(app.get(
 const failed=await mount({token:'connection-code',activeJob:'a'.repeat(32)},true,'failed',0);assert.equal(failed.get('step-0').className,'step failed');assert.equal(failed.get('step-1').className,'step pending');assert(failed.get('result').hidden);
 const insufficient=await mount({lastResult:{...fixture,score:null,severity:'insufficient_data',gemini_reason:null,sample_size:4}});assert(insufficient.get('score-panel').hidden);assert.equal(insufficient.get('rating').textContent,'Not enough data');
 for(const score of [0,100]){const edge=await mount({lastResult:{...fixture,score}});assert(!edge.get('score-panel').hidden);assert.equal(edge.get('risk-marker').style.left,score+'%');}
+assert(html.includes('<summary>stats analysis (FOR THE NERDS)</summary>'));
+assert(!app.get('stats-analysis').hidden);assert.equal(app.get('stat-fit').textContent,'14.03');assert.equal(app.get('stat-p').textContent,'0.081');assert.equal(app.get('stat-ratio').textContent,'49.0%');assert.equal(app.get('stat-activity').textContent,'76.7%');
+const oldStats=await mount({lastResult:{...fixture,stats_analysis:undefined}});assert(oldStats.get('stats-analysis').hidden);
+const unavailableStats=await mount({lastResult:{...fixture,stats_analysis:{goodness_of_fit:null,adjusted_p_value:null,following_imbalance:0,low_activity:null}}});assert.equal(unavailableStats.get('stat-fit').textContent,'Not available');assert.equal(unavailableStats.get('stat-p').textContent,'Not available');assert.equal(unavailableStats.get('stat-ratio').textContent,'0.0%');assert.equal(unavailableStats.get('stat-activity').textContent,'Not available');
+const tinyP=await mount({lastResult:{...fixture,stats_analysis:{...fixture.stats_analysis,adjusted_p_value:1e-12}}});assert.equal(tinyP.get('stat-p').textContent,'1.00e-12');
+const floorP=await mount({lastResult:{...fixture,stats_analysis:{...fixture.stats_analysis,adjusted_p_value:1e-300,p_value_at_floor:true}}});assert.equal(floorP.get('stat-p').textContent,'≤ 1e-300');
 app.offline(true);await app.event('analyze-form','submit');assert(app.get('error').textContent.includes('DeTect is offline'));
 assert.equal(app.get('step-0').className,'step paused');
 assert(html.includes('Up to 300 public followers'));assert(html.includes('>Analyse</button>'));
