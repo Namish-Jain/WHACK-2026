@@ -1,157 +1,186 @@
 # DeTect
 
-DeTect is a local Chrome extension that analyses a Mastodon profile's public followers and explains unusual audience patterns in plain language. Python computes the statistics and bot-risk score; Gemini writes the short explanation.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Chrome](https://img.shields.io/badge/Chrome-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-API-4285F4)
 
-Each analysis reads up to 300 public followers. The extension shows **Reading followers → Analysing patterns → Writing explanation**, followed by a score out of 100, a green-to-red scale and a short explanation. Expand **stats analysis (FOR THE NERDS)** for the Benford chi-square goodness-of-fit statistic, its Holm-adjusted p-value, following-imbalance rate and low-activity rate. Smaller chi-square values mean closer agreement with the Benford reference; this is separate from the bot-risk score. Percentages use followers with known values, and tests that cannot be computed show “Not available”.
+DeTect helps you assess bot risk of a Mastodon profile. Paste a profile link to analyse up to **300 public followers** and get a **score out of 100**, a colour-coded risk scale and a short explanation.
+
+Python calculates the statistics and runs hypothesis tests to determine the likelyhood of the profile being a bot. Gemini explains the results in a concise manner. For a closer look, expand **stats analysis** to see the key figures behind the result.
 
 ## Project layout
 
 ```text
 DeTect/
 ├── backend/
-│   ├── local_server.py       # Local API for the extension
-│   ├── run_pipeline.py       # Collection, history and research commands
-│   ├── collect_mastodon.py   # Mastodon API collector
-│   ├── public_transport.py   # Public connections and redirect handling
-│   ├── history.py            # SQLite storage and follower deduplication
-│   ├── analyze.py            # Standalone analysis and report rendering
-│   ├── analysis/             # Statistics, scoring and hypothesis tests
-│   ├── llm/                  # Gemini integration, settings and prompts
+│   ├── local_server.py       # Connects the extension to Python
+│   ├── run_pipeline.py       # Collects data and runs analysis
+│   ├── collect_mastodon.py   # Reads public Mastodon data
+│   ├── history.py            # Saves and merges follower records
+│   ├── analysis/             # Statistics, scoring and research tools
+│   ├── llm/                  # Gemini integration and prompts
 │   ├── models/               # Follower data model
-│   └── tests/                # Python tests and aggregate regression fixture
+│   └── tests/                # Backend tests
 ├── extension/
 │   ├── manifest.json
 │   ├── popup.html
 │   ├── popup.css
 │   ├── popup.js
 │   ├── logic.mjs
-│   └── tests/                # Popup interaction tests
+│   └── tests/                # Extension tests
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
 
-Local data is created in `backend/history/`. It is ignored by Git, along with `.env`, generated reports and caches.
-
 ## Run locally
 
-Requires **Python 3.10+** and **Google Chrome**. Run these commands from the project root:
+You need **Python 3.10+**, **Google Chrome** and a **Gemini API key**. From the project root:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
+```
+
+Copy `.env.example` to `.env` if you do not already have one:
+
+```sh
 cp .env.example .env
 ```
 
-If you already have a `.env`, keep it instead of running the copy command. Edit it locally:
+Add your key to `.env`:
 
 ```dotenv
 GEMINI_API_KEY=your_key_here
 GEMINI_MODEL=gemini-3.5-flash-lite
 ```
 
-Start the backend:
+Start the backend and keep the terminal open:
 
 ```sh
 python3 backend/local_server.py
 ```
 
-Keep that terminal open. The server listens on `127.0.0.1:8765` and prints a connection code. On macOS, `backend/Start DeTect.command` also starts it using `python3`.
+Then load the extension:
 
 1. Open `chrome://extensions` and enable **Developer mode**.
-2. Choose **Load unpacked**, then select this project's **extension** folder.
-3. Open DeTect, expand **Connection**, paste the terminal's connection code and select **Connect**.
-4. Paste a profile URL or `@username@server`, or select **Use current tab**, then **Analyse**.
+2. Click **Load unpacked** and select the **extension** folder.
+3. Open DeTect → **Connection**, paste the connection code from the terminal and click **Connect**.
+4. Paste a profile URL or `@username@server`, or choose **Use current tab**, then click **Analyse**.
 
-When moving from an older layout, remove the old unpacked extension and load `extension/` from its new location. Restarting the backend generates a new connection code.
+The progress indicator follows three steps: **Reading followers → Analysing patterns → Writing explanation**. Restarting the backend creates a new connection code.
 
 ### Configuration
 
-The server and pipeline CLI read `.env` from the project root, regardless of the directory they are launched from. The core application uses Python's standard library. Matplotlib, the only listed dependency, supports the optional `backend/plot_benford.py` chart exporter.
+The backend runs at `127.0.0.1:8765`. Both the server and command-line pipeline load `.env` from the project root. On macOS, you can also start the server with `backend/Start DeTect.command`.
 
-You can also save a key through **Connection**. For the extension server, saved settings in `backend/history/.detest/gemini.json` take precedence over terminal environment variables, which take precedence over `.env`. To switch entirely to `.env`, remove only that saved settings file and restart. An explicit `--model` option takes precedence over other model settings.
+You can save a Gemini key through the extension’s **Connection** dropdown. For the server, settings saved in `backend/history/.detest/gemini.json` override terminal environment variables and `.env`. An explicit `--model` option overrides the configured model.
 
-Credentials stay on the Python side. They are not stored in Chrome, sent in URLs or written to statistical reports. Gemini receives aggregate evidence, including hypothesis-test results, rather than follower rows or biographies. Never commit your real `.env` or runtime history.
+The core app uses Python’s standard library. Matplotlib is included for the optional `backend/plot_benford.py` chart exporter.
 
-## Statistical analysis
+Your key stays on the backend. Gemini receives summary statistics and hypothesis-test results, without individual follower records or biographies. `.env`, saved history and generated reports are ignored by Git.
 
-| Analysis | What it measures |
+## What the analysis measures
+
+| Analysis | Purpose |
 | --- | --- |
-| Benford first digits | Positive follower-count first digits compared with a Benford reference, with sample-size and range checks. |
-| Following imbalance | Accounts following many more people than follow them, using smoothed ratios. |
-| Activity, age and completeness | Low posting activity, recent creation and sparse profiles, retaining missing values as unknown. |
-| Follower-count distribution | Quartiles, IQR, outliers and standard deviation of `ln(count + 1)`. |
-| Bootstrap intervals | Variation when resampling the observed followers. |
-| Hypothesis tests | Benford chi-square goodness of fit and optional binomial tests against supplied reference rates, with Holm adjustment. |
+| Benford first digits | Compare follower-count first digits with the Benford reference pattern. |
+| Following imbalance | Find accounts following many more people than follow them. |
+| Activity, age and profile completeness | Measure low activity, recently created accounts and sparse profiles. |
+| Follower-count distribution | Describe the spread of follower counts using quartiles, IQR and log-scale standard deviation. |
+| Bootstrap intervals | Check how much results vary when the sample is resampled. |
+| Hypothesis tests | Compare patterns with stated reference models, adjusting for multiple tests. |
 
-The score combines Benford (35%), following imbalance (25%), low activity (20%), new accounts (10%) and incomplete profiles (10%). Unusable components are excluded and remaining weights are renormalised. Labels are low risk up to 30, moderate up to 60, high up to 80 and very high above 80. Insufficient data remains unavailable.
+The bot-risk score uses these weights:
 
-The weights and labels are hackathon heuristics, not a trained bot classifier. The score is not a probability and cannot establish whether the profile owner or its followers are fake. Public samples may be unrepresentative; a Benford mismatch alone is not evidence of manipulation. Hypothesis tests assess their stated references, not whether someone is a bot.
+| Indicator | Weight |
+| --- | --- |
+| Benford deviation | 35% |
+| Following imbalance | 25% |
+| Low activity | 20% |
+| New accounts | 10% |
+| Incomplete profiles | 10% |
 
-## Pipeline and saved data
+If an indicator lacks usable data, its weight is redistributed across the available indicators. Risk labels are **low** up to 30, **moderate** up to 60, **high** up to 80 and **very high** above 80. Too little data produces an unavailable result.
 
-From the project root:
+The **stats analysis** dropdown shows:
+
+- **Goodness of fit score (χ²):** how far the first-digit pattern differs from the Benford reference. Lower means closer agreement.
+- **Adjusted p-value:** the goodness-of-fit test’s p-value after Holm correction.
+- **Following imbalance:** the percentage of followers with an unusually high following-to-follower ratio.
+- **Low-activity followers:** the percentage with few posts.
+
+Percentages use followers with known values. Tests that cannot be calculated show **Not available**. The χ² statistic is separate from the overall bot-risk score.
+
+The score uses manually chosen hackathon rules. It is not a probability or proof that an account is fake. Public follower samples may be incomplete, and legitimate accounts can show the same patterns. Hypothesis tests evaluate their stated references; they do not identify bots.
+
+## Command-line tools
+
+Run these commands from the project root:
 
 ```sh
-# Collect and analyse a public audience
+# Collect and analyse an audience
 python3 backend/run_pipeline.py collect '@username@server' --limit 300
 
-# Import an existing collector export
+# Import an existing collection
 python3 backend/run_pipeline.py import /path/to/collection
 
-# Rebuild comparison exports
+# Update comparisons across saved accounts
 python3 backend/run_pipeline.py compare
 
-# Explain a saved report without recollecting
+# Explain a saved report without collecting again
 python3 backend/run_pipeline.py explain '@username@server'
 
-# Inspect the prompt without calling Gemini
+# Preview the prompt without calling Gemini
 python3 backend/run_pipeline.py explain '@username@server' --prepare-only
 ```
 
-Commands share `backend/history/`; use `--store` to select another persistent directory. Some Mastodon servers hide followers, require authentication or are unreachable. Bridged Bluesky and Instagram profiles are unsupported. Direct CLI collection supports an exported `MASTODON_ACCESS_TOKEN` for the chosen instance; the `.env` loader reads Gemini settings only.
+Commands use `backend/history/` by default. Pass `--store` to use another location, or `--help` to see options.
 
-Collections merge records by stable follower identity, retaining the newest observation. Scores are recomputed from records rather than averaged. Accounts remain separate and identical imports reuse their run. Snapshots describe one collection; cumulative reports describe everyone observed across collections, not the current follower list.
+The collector supports Mastodon profiles with accessible follower lists. Instagram and bridged Bluesky profiles are unsupported. Direct command-line collection can use an exported `MASTODON_ACCESS_TOKEN` if the instance requires one; the `.env` loader reads Gemini settings only.
 
-| Local output | Contents |
+## Saved data
+
+New collections merge with existing records for the same target account. Each follower’s newest record is kept, and statistics are recalculated. Different target accounts stay separate; identical imports reuse the existing run.
+
+**Snapshot reports** describe one collection. **Cumulative reports** describe all followers observed over time, which may differ from the current follower list.
+
+All paths below are inside `backend/history/`:
+
+| Path | Contents |
 | --- | --- |
-| `backend/history/history.sqlite3` | Authoritative history and computed reports |
-| `backend/history/collections/` | Collected API exports |
-| `backend/history/runs/<run_id>/snapshot/` and `cumulative/` | Statistical reports and data |
-| `backend/history/comparison.md` and `comparison.json` | Latest account comparisons |
-| `backend/history/extension_results/` | Extension results and Gemini artifacts |
-| `backend/history/explanations/` | Detailed CLI explanations |
+| `history.sqlite3` | Saved records and calculated results |
+| `collections/` | Collected API data |
+| `runs/<run_id>/snapshot/` and `cumulative/` | Statistical reports |
+| `comparison.md` and `comparison.json` | Account comparisons |
+| `extension_results/` | Extension results and Gemini explanations |
+| `explanations/` | Detailed command-line explanations |
 
-Keep the whole history directory when moving the project. A Gemini failure preserves statistics; **Retry explanation** reuses them while the backend remains running.
+Keep the entire history folder when moving the project. If Gemini fails, the statistics remain saved. **Retry explanation** reuses them while the backend is running.
 
 ## Research tools
 
 ```sh
+# Test the scoring rules on simulated audiences
 python3 backend/run_pipeline.py validate
+
+# Compare shared followers across saved accounts
 python3 backend/run_pipeline.py network
 ```
 
-Validation runs synthetic scenarios and writes an interactive report to `backend/experiments/` without altering collected history. Network analysis compares latest snapshots using shared counts, Jaccard similarity and overlap coefficients. It needs at least two accounts and writes to `backend/history/network/`. Neither tool trains the score or proves bot activity.
+Validation writes an interactive report to `backend/experiments/`. Network analysis needs at least two saved accounts and writes overlap measures to `backend/history/network/`. These tools do not change the score or establish bot activity.
 
-`backend/config.example.json` documents scoring settings. `backend/hypotheses.example.json` is the starting point for explicitly justified hypothesis references. Use `--help` on each command for options.
+Scoring options are in `backend/config.example.json`. Hypothesis-test settings are in `backend/hypotheses.example.json`.
 
 ## Tests
-
-From the project root:
 
 ```sh
 PYTHONPATH=backend python3 -m unittest discover -s backend/tests
 node extension/tests/test_popup.mjs
 ```
 
-Node.js is needed only for JavaScript tests. Python tests use temporary data and mocked Gemini requests; no real API key is needed. Popup tests use DOM doubles, not a loaded Chrome extension. The aggregate regression fixture preserves numerical checks without follower rows or original account/path identifiers.
-
-## Troubleshooting
-
-- **Offline or connection rejected:** start the backend and reconnect with the code from that terminal. Restarting changes the code.
-- **Port already in use:** stop the old server before starting another.
-- **Gemini timeout, quota or unavailable model:** check the specific error, model access and quota, then retry. Model availability can change.
-- **Changed `.env`:** restart the backend. A saved Connection key can override it.
-- **Old extension layout:** reload after code changes; load the new folder if it moved.
+Python tests use temporary data and simulated Gemini responses, so no API key is needed. Node.js is required only for the extension tests, which simulate popup interactions without opening Chrome.
